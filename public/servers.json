@@ -1,0 +1,14 @@
+[
+  {
+    "id": "anzr-1",
+    "name": "ANZR Server #1",
+    "url": "https://api.example.com/server1/status",
+    "description": "Primary ANZR Battle Server"
+  },
+  {
+    "id": "anzr-2", 
+    "name": "ANZR Server #2",
+    "url": "https://api.example.com/server2/status",
+    "description": "Secondary ANZR Battle Server"
+  }
+]
