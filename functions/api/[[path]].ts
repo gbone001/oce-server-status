@@ -23,6 +23,7 @@ export async function onRequest(context: any): Promise<Response> {
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
+    const allowAll = String(env?.ALLOW_ALL_TARGETS || '').toLowerCase() === 'true';
     let parsed: URL;
     try {
       parsed = new URL(qTarget);
@@ -33,7 +34,7 @@ export async function onRequest(context: any): Promise<Response> {
       });
     }
     const hostPort = parsed.host; // includes :port
-    if (!allowed.includes(hostPort)) {
+    if (!allowAll && !allowed.includes(hostPort)) {
       return new Response(JSON.stringify({ error: 'Target not allowed', host: hostPort }), {
         status: 403,
         headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
