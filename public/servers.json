@@ -1,0 +1,19 @@
+{
+  "servers": [
+    {
+      "id": "oce-server-1",
+      "name": "OCE Server #1",
+      "apiUrl": "https://api.example.com/server1/status"
+    },
+    {
+      "id": "oce-server-2", 
+      "name": "OCE Server #2",
+      "apiUrl": "https://api.example.com/server2/status"
+    },
+    {
+      "id": "oce-server-3",
+      "name": "OCE Server #3", 
+      "apiUrl": "https://api.example.com/server3/status"
+    }
+  ]
+}
