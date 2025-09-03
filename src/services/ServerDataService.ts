@@ -18,20 +18,23 @@ export class ServerDataService {
   }
 
   static async fetchServerStatus(server: ServerConfig): Promise<ServerStatus> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     try {
-      // For demo purposes, generate mock data. Replace with real fetch to server.apiUrl for production.
-      const mockData = this.generateMockServerData(server);
-
-      // Simulate API call with random delay
-      await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000 + 500));
-
-      // Simulate occasional failures
-      if (Math.random() < 0.1) {
-        throw new Error('Server unreachable');
+      const res = await fetch(server.apiUrl, { signal: controller.signal, headers: { 'Accept': 'application/json' } });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      }
+      let data: any;
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error('Invalid JSON response');
       }
 
+      const mapped = this.mapApiResponseToStatus(data, server);
       return {
-        ...mockData,
+        ...mapped,
         status: 'success',
         lastUpdated: new Date(),
       };
@@ -50,6 +53,8 @@ export class ServerDataService {
         lastUpdated: new Date(),
         error: error instanceof Error ? error.message : 'Unknown error',
       };
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
@@ -77,6 +82,55 @@ export class ServerDataService {
       axisScore: Math.floor(Math.random() * 6),
       currentMap: maps[Math.floor(Math.random() * maps.length)],
       nextMap: maps[Math.floor(Math.random() * maps.length)],
+    };
+  }
+
+  private static mapApiResponseToStatus(
+    data: any,
+    server: ServerConfig
+  ): Omit<ServerStatus, 'status' | 'lastUpdated'> {
+    const num = (v: any, d = 0) => (typeof v === 'number' && isFinite(v) ? v : d);
+    const str = (v: any, d = 'Unknown') => (typeof v === 'string' && v.trim() !== '' ? v : d);
+
+    // Try multiple common key variants
+    const alliesPlayers = num(
+      data?.alliesPlayers ?? data?.allies ?? data?.allies_count ?? data?.numAllies ?? data?.num_allies ?? data?.players?.allies
+    , 0);
+    const axisPlayers = num(
+      data?.axisPlayers ?? data?.axis ?? data?.axis_count ?? data?.numAxis ?? data?.num_axis ?? data?.players?.axis
+    , 0);
+
+    const gameTimeRaw = data?.gameTime ?? data?.match_time ?? data?.time ?? data?.game_time;
+    const gameTime = typeof gameTimeRaw === 'string'
+      ? gameTimeRaw
+      : typeof gameTimeRaw === 'number'
+        ? String(gameTimeRaw)
+        : '--:--';
+
+    const alliesScore = num(
+      data?.alliesScore ?? data?.score?.allies ?? data?.allies_score ?? data?.scores?.allies
+    , 0);
+    const axisScore = num(
+      data?.axisScore ?? data?.score?.axis ?? data?.axis_score ?? data?.scores?.axis
+    , 0);
+
+    const currentMap = str(
+      data?.currentMap ?? data?.map ?? data?.current_map
+    , 'Unknown');
+    const nextMap = str(
+      data?.nextMap ?? data?.next_map ?? data?.nextMapName
+    , 'Unknown');
+
+    return {
+      id: server.id,
+      name: server.name,
+      alliesPlayers,
+      axisPlayers,
+      gameTime,
+      alliesScore,
+      axisScore,
+      currentMap,
+      nextMap,
     };
   }
 }
