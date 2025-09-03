@@ -21,7 +21,8 @@ export class ServerDataService {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
     try {
-      const res = await fetch(server.apiUrl, { signal: controller.signal, headers: { 'Accept': 'application/json' } });
+      const url = this.toProxiedUrl(server.apiUrl);
+      const res = await fetch(url, { signal: controller.signal, headers: { 'Accept': 'application/json' } });
       if (!res.ok) {
         throw new Error(`HTTP ${res.status} ${res.statusText}`);
       }
@@ -142,6 +143,24 @@ export class ServerDataService {
       currentMap,
       nextMap,
     };
+  }
+
+  // If the apiUrl is http:// and the app is served over https, route via Cloudflare Pages function
+  private static toProxiedUrl(apiUrl: string): string {
+    try {
+      const u = new URL(apiUrl, window.location.origin);
+      const isHttp = u.protocol === 'http:';
+      const isHttpsPage = typeof window !== 'undefined' && window.location.protocol === 'https:';
+      if (isHttp && isHttpsPage) {
+        const origin = `${window.location.origin}`; // assumes CF Pages hosting with function at /api
+        // Use query param mode with allow-listed hosts on the function
+        const target = encodeURIComponent(u.toString());
+        return `${origin}/api?target=${target}`;
+      }
+      return u.toString();
+    } catch {
+      return apiUrl; // fall back to raw
+    }
   }
 }
 

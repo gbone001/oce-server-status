@@ -13,9 +13,38 @@ export async function onRequest(context: any): Promise<Response> {
     });
   }
 
-  const targetPath = Array.isArray(params?.path) ? params.path.join('/') : '';
-  const origin = (env?.TARGET_ORIGIN as string) || 'http://148.113.196.189:7010';
-  const targetUrl = `${origin.replace(/\/$/, '')}/${targetPath}`;
+  const url = new URL(request.url);
+  const qTarget = url.searchParams.get('target');
+  let targetUrl: string;
+
+  if (qTarget) {
+    // Proxy arbitrary target only if allowed by ALLOWED_HOSTS
+    const allowed = String(env?.ALLOWED_HOSTS || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    let parsed: URL;
+    try {
+      parsed = new URL(qTarget);
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid target URL' }), {
+        status: 400,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      });
+    }
+    const hostPort = parsed.host; // includes :port
+    if (!allowed.includes(hostPort)) {
+      return new Response(JSON.stringify({ error: 'Target not allowed', host: hostPort }), {
+        status: 403,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      });
+    }
+    targetUrl = parsed.toString();
+  } else {
+    const targetPath = Array.isArray(params?.path) ? params.path.join('/') : '';
+    const origin = (env?.TARGET_ORIGIN as string) || 'http://148.113.196.189:7010';
+    targetUrl = `${origin.replace(/\/$/, '')}/${targetPath}`;
+  }
 
   try {
     // Clone incoming headers; set an explicit UA; drop host header
@@ -71,4 +100,3 @@ function applyCors(h: Headers) {
     h.set(k, v);
   }
 }
-
