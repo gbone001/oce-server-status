@@ -16,6 +16,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleTheme, isDark }) => {
               <img 
                 src={`${process.env.PUBLIC_URL}/anzr-logo.svg`} 
                 alt="ANZR Logo" 
+                width={48}
+                height={48}
+                decoding="async"
                 className="w-12 h-12 rounded-lg"
               />
               <h1 className="ml-3 text-xl font-semibold text-gray-900 dark:text-white">
