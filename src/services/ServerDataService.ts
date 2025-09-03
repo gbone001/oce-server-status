@@ -86,8 +86,44 @@ export namespace ServerDataService {
   export function validateServersConfig(input: any): ServersConfig {
     const errors: string[] = [];
 
+    // Accept legacy/simple array format: [{ name, url }]
+    if (Array.isArray(input)) {
+      const result: ServerConfig[] = [];
+      const seenIds = new Set<string>();
+      input.forEach((s: any, idx: number) => {
+        const path = `servers[${idx}]`;
+        if (!s || typeof s !== 'object') {
+          errors.push(`${path} must be an object`);
+          return;
+        }
+        const name = typeof s.name === 'string' ? s.name.trim() : '';
+        const url = typeof s.url === 'string' ? s.url.trim() : '';
+        if (!name) errors.push(`${path}.name must be a non-empty string`);
+        if (!url) errors.push(`${path}.url must be a non-empty string`);
+        const baseId = name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '') || `server-${idx+1}`;
+        let id = baseId;
+        let salt = 1;
+        while (seenIds.has(id)) {
+          salt += 1;
+          id = `${baseId}-${salt}`;
+        }
+        seenIds.add(id);
+        if (name && url) {
+          result.push({ id, name, apiUrl: url });
+        }
+      });
+      if (errors.length > 0) {
+        throw new Error(`Invalid servers.json (array format):\n- ${errors.join('\n- ')}`);
+      }
+      return { servers: result };
+    }
+
+    // Object format: { servers: [{ id, name, apiUrl }] }
     if (!input || typeof input !== 'object') {
-      throw new Error('Invalid servers.json: root must be an object.');
+      throw new Error('Invalid servers.json: root must be an object or an array.');
     }
 
     const servers = (input as any).servers;
@@ -111,7 +147,6 @@ export namespace ServerDataService {
         if (seenIds.has(id)) errors.push(`${path}.id duplicates an existing id: "${id}"`);
         else seenIds.add(id);
       }
-      // Only push valid-looking items to result to avoid undefined entries
       if (typeof id === 'string' && typeof name === 'string' && typeof apiUrl === 'string') {
         result.push({ id, name, apiUrl });
       }
