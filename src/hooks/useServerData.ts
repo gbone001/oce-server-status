@@ -57,22 +57,23 @@ export const useServerData = () => {
     }
   }, [servers, fetchServerStatuses]);
 
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      try {
-        const config = await ServerDataService.fetchServersConfig();
-        setServers(config.servers);
-        await fetchServerStatuses(config.servers);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load configuration');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialData();
+  const loadConfigAndStatuses = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const config = await ServerDataService.fetchServersConfig();
+      setServers(config.servers);
+      await fetchServerStatuses(config.servers);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load configuration');
+    } finally {
+      setLoading(false);
+    }
   }, [fetchServerStatuses]);
+
+  useEffect(() => {
+    loadConfigAndStatuses();
+  }, [loadConfigAndStatuses]);
 
   useEffect(() => {
     if (servers.length === 0) return;
@@ -90,6 +91,7 @@ export const useServerData = () => {
     lastRefresh,
     loading,
     error,
-    refreshData
+    refreshData,
+    reloadConfig: loadConfigAndStatuses
   };
 };

@@ -184,17 +184,25 @@ To add new columns to the server table:
 
 ## Deployment
 
-### GitHub Pages (Automatic)
+### GitHub Pages (gh-pages branch)
 
-The app automatically deploys to GitHub Pages when changes are pushed to the main branch via GitHub Actions.
+This project is configured to publish the production build to the `gh-pages` branch.
 
-### Manual Deployment
+1) In GitHub: Settings → Pages
+- Build and deployment → Source: Deploy from a branch
+- Branch: `gh-pages` and Folder: `/` (root)
 
+2) Locally, deploy the site:
 ```bash
+npm install
 npm run deploy
 ```
+This builds the app and publishes `build/` to the `gh-pages` branch. The page will be served at:
+`https://gbone001.github.io/oce-server-status`
 
-This builds the app and pushes it to the `gh-pages` branch.
+Notes:
+- `package.json:homepage` is already set for correct asset paths.
+- Assets that use `process.env.PUBLIC_URL` (e.g., logo, `servers.json`) will resolve under the GitHub Pages subpath.
 
 ### Custom Domain
 

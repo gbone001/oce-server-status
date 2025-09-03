@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleTheme, isDark }) => {
             <div className="flex-shrink-0 flex items-center">
               {/* ANZR Logo */}
               <img 
-                src="/anzr-logo.svg" 
+                src={`${process.env.PUBLIC_URL}/anzr-logo.svg`} 
                 alt="ANZR Logo" 
                 className="w-12 h-12 rounded-lg"
               />
