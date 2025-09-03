@@ -1,0 +1,26 @@
+[
+  {
+    "id": "anzr-server-1",
+    "name": "ANZR #1 Sydney",
+    "ip": "203.214.96.5",
+    "port": 27015,
+    "region": "Sydney",
+    "gameType": "Counter-Strike 2"
+  },
+  {
+    "id": "anzr-server-2", 
+    "name": "ANZR #2 Melbourne",
+    "ip": "103.193.80.25",
+    "port": 27015,
+    "region": "Melbourne",
+    "gameType": "Counter-Strike 2"
+  },
+  {
+    "id": "anzr-server-3",
+    "name": "ANZR #3 Perth", 
+    "ip": "139.99.144.50",
+    "port": 27015,
+    "region": "Perth",
+    "gameType": "Counter-Strike 2"
+  }
+]

@@ -1,0 +1,63 @@
+.server-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.status-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.server-status-indicator.offline .status-dot {
+  animation: none;
+}
+
+.server-status-indicator.excellent .status-dot {
+  box-shadow: 0 0 8px rgba(68, 255, 68, 0.5);
+}
+
+.server-status-indicator.good .status-dot {
+  box-shadow: 0 0 8px rgba(255, 255, 68, 0.5);
+}
+
+.server-status-indicator.fair .status-dot {
+  box-shadow: 0 0 8px rgba(255, 136, 68, 0.5);
+}
+
+.server-status-indicator.poor .status-dot,
+.server-status-indicator.offline .status-dot {
+  box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .status-text {
+    display: none;
+  }
+  
+  .status-dot {
+    width: 14px;
+    height: 14px;
+  }
+}
