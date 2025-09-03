@@ -160,7 +160,8 @@ export class ServerDataService {
           return `${proxyBase.replace(/\/$/, '')}?target=${target}`;
         }
         // Fall back to same-origin + PUBLIC_URL mounted functions path (if hosted with functions)
-        const basePath = (process.env.PUBLIC_URL || '').replace(/\/$/, '');
+        const rawBase = process.env.PUBLIC_URL || '';
+        const basePath = rawBase === '.' ? '' : rawBase.replace(/\/$/, '');
         return `${window.location.origin}${basePath}/api?target=${target}`;
       }
       return u.toString();
