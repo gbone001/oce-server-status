@@ -6,7 +6,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleTheme, isDark }) => {
-  const logoSrc = `${process.env.PUBLIC_URL}/${encodeURIComponent('new ANZR Logo 05 2025.png')}`;
+  const pngLogo = `${process.env.PUBLIC_URL}/anzr-logo.png`;
+  const webpLogo = `${process.env.PUBLIC_URL}/anzr-logo.webp`;
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,14 +15,19 @@ export const Header: React.FC<HeaderProps> = ({ onToggleTheme, isDark }) => {
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               {/* ANZR Logo */}
-              <img 
-                src={logoSrc}
-                alt="ANZR Logo" 
-                width={48}
-                height={48}
-                decoding="async"
-                className="w-12 h-12 rounded-lg"
-              />
+              <picture>
+                <source srcSet={webpLogo} type="image/webp" />
+                <img
+                  src={pngLogo}
+                  alt="ANZR Logo"
+                  width={48}
+                  height={48}
+                  decoding="async"
+                  loading="eager"
+                  fetchPriority="high"
+                  className="w-12 h-12 rounded-lg"
+                />
+              </picture>
               <h1 className="ml-3 text-xl font-semibold text-gray-900 dark:text-white">
                 OCE Server Status
               </h1>

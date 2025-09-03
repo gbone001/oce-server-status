@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Optimize images
+        run: node scripts/optimize-logo.js
+
       - name: Validate servers.json
         run: node scripts/validate-servers.js
 
