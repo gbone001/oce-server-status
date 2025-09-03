@@ -94,10 +94,10 @@ export class ServerDataService {
 
     // Try multiple common key variants
     const alliesPlayers = num(
-      data?.alliesPlayers ?? data?.allies ?? data?.allies_count ?? data?.numAllies ?? data?.num_allies ?? data?.players?.allies
+      data?.alliesPlayers ?? data?.allies ?? data?.allies_count ?? data?.numAllies ?? data?.num_allies ?? data?.players?.allies ?? data?.player_count_by_team?.allied
     , 0);
     const axisPlayers = num(
-      data?.axisPlayers ?? data?.axis ?? data?.axis_count ?? data?.numAxis ?? data?.num_axis ?? data?.players?.axis
+      data?.axisPlayers ?? data?.axis ?? data?.axis_count ?? data?.numAxis ?? data?.num_axis ?? data?.players?.axis ?? data?.player_count_by_team?.axis
     , 0);
 
     const gameTimeRaw = data?.gameTime ?? data?.match_time ?? data?.time ?? data?.game_time;
@@ -107,26 +107,36 @@ export class ServerDataService {
         ? String(gameTimeRaw)
         : '--:--';
 
+    const timeRemainingSeconds = num(
+      data?.time_remaining ?? data?.remaining_time ?? data?.timeRemaining
+    , undefined as any);
+
     const alliesScore = num(
-      data?.alliesScore ?? data?.score?.allies ?? data?.allies_score ?? data?.scores?.allies
+      data?.alliesScore ?? data?.score?.allied ?? data?.score?.allies ?? data?.allies_score ?? data?.scores?.allies
     , 0);
     const axisScore = num(
       data?.axisScore ?? data?.score?.axis ?? data?.axis_score ?? data?.scores?.axis
     , 0);
 
     const currentMap = str(
-      data?.currentMap ?? data?.map ?? data?.current_map
+      data?.currentMap ?? data?.map ?? data?.current_map?.map?.id ?? data?.current_map?.map?.name ?? data?.current_map
     , 'Unknown');
     const nextMap = str(
-      data?.nextMap ?? data?.next_map ?? data?.nextMapName
+      data?.nextMap ?? data?.next_map?.map?.id ?? data?.next_map?.map?.name ?? data?.next_map ?? data?.nextMapName
     , 'Unknown');
+
+    const shortName = str(
+      data?.short_name ?? data?.shortName ?? ''
+    , undefined as any);
 
     return {
       id: server.id,
       name: server.name,
+      shortName: shortName || undefined,
       alliesPlayers,
       axisPlayers,
       gameTime,
+      timeRemainingSeconds: typeof timeRemainingSeconds === 'number' ? timeRemainingSeconds : undefined,
       alliesScore,
       axisScore,
       currentMap,

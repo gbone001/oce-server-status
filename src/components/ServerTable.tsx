@@ -31,6 +31,13 @@ export const ServerTable: React.FC<ServerTableProps> = ({ serverStatuses }) => {
     );
   }
 
+  const formatRemaining = (secs?: number) => {
+    if (typeof secs !== 'number' || !isFinite(secs) || secs < 0) return '--:--';
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700">
       <div className="overflow-x-auto">
@@ -46,7 +53,7 @@ export const ServerTable: React.FC<ServerTableProps> = ({ serverStatuses }) => {
           </colgroup>
           <thead className="bg-gray-100 dark:bg-gray-900 sticky top-0 z-10">
             <tr>
-              {['Server','Status','Players','Game Time','Score','Current Map','Next Map'].map((h) => (
+              {['Server','Short Name','Players','Score','Time Remaining','Current Map','Next Map'].map((h) => (
                 <th
                   key={h}
                   scope="col"
@@ -67,7 +74,7 @@ export const ServerTable: React.FC<ServerTableProps> = ({ serverStatuses }) => {
                   <span className="font-medium text-gray-900 dark:text-white">{server.name}</span>
                 </td>
                 <td className="px-4 py-3 border border-gray-200 dark:border-gray-700 align-middle">
-                  <StatusIndicator status={server.status} error={server.error} />
+                  <span className="text-gray-900 dark:text-white">{server.shortName ?? '-'}</span>
                 </td>
                 <td className="px-4 py-3 border border-gray-200 dark:border-gray-700 align-middle text-right">
                   <div className="inline-flex items-center gap-3">
@@ -83,10 +90,10 @@ export const ServerTable: React.FC<ServerTableProps> = ({ serverStatuses }) => {
                   </div>
                 </td>
                 <td className="px-4 py-3 border border-gray-200 dark:border-gray-700 align-middle text-center">
-                  <span className="font-mono tabular-nums text-gray-900 dark:text-white">{server.gameTime}</span>
+                  <ScoreDisplay allies={server.alliesScore} axis={server.axisScore} />
                 </td>
                 <td className="px-4 py-3 border border-gray-200 dark:border-gray-700 align-middle text-center">
-                  <ScoreDisplay allies={server.alliesScore} axis={server.axisScore} />
+                  <span className="font-mono tabular-nums text-gray-900 dark:text-white">{formatRemaining(server.timeRemainingSeconds)}</span>
                 </td>
                 <td className="px-4 py-3 border border-gray-200 dark:border-gray-700 align-middle">
                   <span className="text-gray-900 dark:text-white">{server.currentMap}</span>

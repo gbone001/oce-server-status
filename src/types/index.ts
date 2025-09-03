@@ -7,10 +7,12 @@ export interface ServerConfig {
 export interface ServerStatus {
   id: string;
   name: string;
+  shortName?: string;
   status: 'success' | 'error';
   alliesPlayers: number;
   axisPlayers: number;
   gameTime: string;
+  timeRemainingSeconds?: number;
   alliesScore: number; // 0-5 points
   axisScore: number; // 0-5 points
   currentMap: string;
