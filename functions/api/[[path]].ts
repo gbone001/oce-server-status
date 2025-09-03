@@ -1,16 +1,15 @@
 // Cloudflare Pages Functions reverse proxy for HTTP backends
-// Usage: request /api/<path> and this will fetch from TARGET_ORIGIN/<path>
-// Set TARGET_ORIGIN as a Pages Environment Variable, e.g. http://148.113.196.189:7010
+// Usage: request /api/<path> or /api?target=<full_http_url>
+// Environment:
+// - ALLOWED_HOSTS: comma-separated host:port allowlist for ?target URLs
+// - TARGET_ORIGIN (optional): default origin for path-based proxying
 
 export async function onRequest(context: any): Promise<Response> {
   const { request, params, env } = context;
 
   // Basic CORS preflight support
   if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders(),
-    });
+    return new Response(null, { status: 204, headers: corsHeaders() });
   }
 
   const url = new URL(request.url);
@@ -41,18 +40,22 @@ export async function onRequest(context: any): Promise<Response> {
     }
     targetUrl = parsed.toString();
   } else {
-    const targetPath = Array.isArray(params?.path) ? params.path.join('/') : '';
+    // Path-based proxying using TARGET_ORIGIN
+    const targetPathParam = params?.path; // string or undefined for [[path]]
+    const targetPath = Array.isArray(targetPathParam)
+      ? targetPathParam.join('/')
+      : typeof targetPathParam === 'string'
+        ? targetPathParam
+        : '';
     const origin = (env?.TARGET_ORIGIN as string) || 'http://148.113.196.189:7010';
     targetUrl = `${origin.replace(/\/$/, '')}/${targetPath}`;
   }
 
   try {
-    // Clone incoming headers; set an explicit UA; drop host header
     const inHeaders = new Headers(request.headers);
     inHeaders.set('User-Agent', 'Cloudflare-Proxy');
     inHeaders.delete('host');
 
-    // Only forward a body for non-GET/HEAD requests
     const hasBody = !['GET', 'HEAD'].includes(request.method);
     const body = hasBody ? await request.arrayBuffer() : undefined;
 
@@ -63,20 +66,14 @@ export async function onRequest(context: any): Promise<Response> {
       redirect: 'follow',
     });
 
-    // Build response with passthrough status and content-type, plus permissive CORS
     const outHeaders = new Headers();
     const ct = resp.headers.get('content-type') || 'application/json';
     outHeaders.set('Content-Type', ct);
-    // Allow caching headers from origin if present
     const cacheControl = resp.headers.get('cache-control');
     if (cacheControl) outHeaders.set('Cache-Control', cacheControl);
-    // CORS
     applyCors(outHeaders);
 
-    return new Response(resp.body, {
-      status: resp.status,
-      headers: outHeaders,
-    });
+    return new Response(resp.body, { status: resp.status, headers: outHeaders });
   } catch (err: any) {
     const message = err?.message || 'Proxy error';
     return new Response(JSON.stringify({ error: message, target: targetUrl }), {
@@ -96,7 +93,6 @@ function corsHeaders(): HeadersInit {
 
 function applyCors(h: Headers) {
   const base = corsHeaders();
-  for (const [k, v] of Object.entries(base)) {
-    h.set(k, v);
-  }
+  for (const [k, v] of Object.entries(base)) h.set(k, v as string);
 }
+
