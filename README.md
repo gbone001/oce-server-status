@@ -184,6 +184,23 @@ To add new columns to the server table:
 
 ## Deployment
 
+### Deploy on Cloudflare Pages
+
+- Connect this repository in Cloudflare → Workers & Pages → Create application → Pages.
+- Build command: `npm ci && npm run build`
+- Output directory: `build`
+- Functions: auto-detected from `functions/api/[[path]].ts` (no wrangler.toml needed)
+- Environment variables (Production):
+  - `NODE_VERSION=18`
+  - `ALLOWED_HOSTS=148.113.196.189:7010,145.223.22.23:7010,147.93.104.243:7010,154.26.158.99:7010`
+  - Optional `TARGET_ORIGIN=http://148.113.196.189:7010`
+
+Proxy behavior
+- The app runs over HTTPS on Cloudflare Pages and automatically proxies any `http://` backend to `/api?target=<http-url>` on the same domain.
+- The function validates the target against `ALLOWED_HOSTS` and returns the response with permissive CORS.
+
+Note: The GitHub Pages deployment instructions below are deprecated now that this project targets Cloudflare Pages.
+
 ### GitHub Pages (gh-pages branch)
 
 This project is configured to publish the production build to the `gh-pages` branch.
