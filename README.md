@@ -204,6 +204,19 @@ Notes:
 - `package.json:homepage` is already set for correct asset paths.
 - Assets that use `process.env.PUBLIC_URL` (e.g., logo, `servers.json`) will resolve under the GitHub Pages subpath.
 
+### Cloudflare Pages Proxy (to avoid mixed content)
+
+If your server APIs are `http://` and your site runs on `https://` (GitHub Pages), enable the Cloudflare proxy and point the app at it:
+
+- Deploy this same repo to Cloudflare Pages (auto-detects `functions/`)
+- In Cloudflare Pages, set environment variables:
+  - `ALLOWED_HOSTS`: comma-separated `host:port` list for your backends
+  - Optional `TARGET_ORIGIN`: default backend for path-based proxy
+- Build your GitHub Pages site with:
+  - `REACT_APP_PROXY_URL=https://<your-pages-project>.pages.dev/api`
+
+The app will route `http://` API calls through `REACT_APP_PROXY_URL?target=<http-url>` to avoid mixed content and CORS issues.
+
 ### Custom Domain
 
 To use a custom domain, add a `CNAME` file to the `public/` directory with your domain name.

@@ -145,17 +145,23 @@ export class ServerDataService {
     };
   }
 
-  // If the apiUrl is http:// and the app is served over https, route via Cloudflare Pages function
+  // If the apiUrl is http:// and the app is served over https, route via a proxy
   private static toProxiedUrl(apiUrl: string): string {
     try {
       const u = new URL(apiUrl, window.location.origin);
       const isHttp = u.protocol === 'http:';
       const isHttpsPage = typeof window !== 'undefined' && window.location.protocol === 'https:';
       if (isHttp && isHttpsPage) {
-        const origin = `${window.location.origin}`; // assumes CF Pages hosting with function at /api
-        // Use query param mode with allow-listed hosts on the function
+        // Prefer a dedicated proxy base if provided (e.g., Cloudflare Pages domain)
+        const proxyBase = process.env.REACT_APP_PROXY_URL;
         const target = encodeURIComponent(u.toString());
-        return `${origin}/api?target=${target}`;
+        if (proxyBase) {
+          // Ensure no trailing slash
+          return `${proxyBase.replace(/\/$/, '')}?target=${target}`;
+        }
+        // Fall back to same-origin + PUBLIC_URL mounted functions path (if hosted with functions)
+        const basePath = (process.env.PUBLIC_URL || '').replace(/\/$/, '');
+        return `${window.location.origin}${basePath}/api?target=${target}`;
       }
       return u.toString();
     } catch {
