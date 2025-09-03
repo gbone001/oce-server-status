@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate servers.json
+        run: node scripts/validate-servers.js
+
       - name: Build
         run: npm run build
 
@@ -35,4 +38,3 @@ jobs:
           publish_branch: gh-pages
           # Set to true if you want a single-commit history on gh-pages
           # force_orphan: true
-
