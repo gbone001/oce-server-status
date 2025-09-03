@@ -8,7 +8,9 @@ export class ServerDataService {
       if (!response.ok) {
         throw new Error(`Failed to fetch servers config: ${response.statusText}`);
       }
-      return await response.json();
+      const data = await response.json();
+      const validated = this.validateServersConfig(data);
+      return validated;
     } catch (error) {
       console.error('Error fetching servers config:', error);
       throw error;
@@ -79,3 +81,46 @@ export class ServerDataService {
   }
 }
 
+// Lightweight runtime validation of servers.json
+export namespace ServerDataService {
+  export function validateServersConfig(input: any): ServersConfig {
+    const errors: string[] = [];
+
+    if (!input || typeof input !== 'object') {
+      throw new Error('Invalid servers.json: root must be an object.');
+    }
+
+    const servers = (input as any).servers;
+    if (!Array.isArray(servers)) {
+      throw new Error('Invalid servers.json: "servers" must be an array.');
+    }
+
+    const seenIds = new Set<string>();
+    const result: ServerConfig[] = [];
+    servers.forEach((s: any, idx: number) => {
+      const path = `servers[${idx}]`;
+      if (!s || typeof s !== 'object') {
+        errors.push(`${path} must be an object`);
+        return;
+      }
+      const { id, name, apiUrl } = s as Partial<ServerConfig>;
+      if (typeof id !== 'string' || id.trim() === '') errors.push(`${path}.id must be a non-empty string`);
+      if (typeof name !== 'string' || name.trim() === '') errors.push(`${path}.name must be a non-empty string`);
+      if (typeof apiUrl !== 'string' || apiUrl.trim() === '') errors.push(`${path}.apiUrl must be a non-empty string`);
+      if (typeof id === 'string') {
+        if (seenIds.has(id)) errors.push(`${path}.id duplicates an existing id: "${id}"`);
+        else seenIds.add(id);
+      }
+      // Only push valid-looking items to result to avoid undefined entries
+      if (typeof id === 'string' && typeof name === 'string' && typeof apiUrl === 'string') {
+        result.push({ id, name, apiUrl });
+      }
+    });
+
+    if (errors.length > 0) {
+      throw new Error(`Invalid servers.json:\n- ${errors.join('\n- ')}`);
+    }
+
+    return { servers: result };
+  }
+}
