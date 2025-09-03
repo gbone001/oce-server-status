@@ -1,0 +1,73 @@
+{
+  "servers": [
+    {
+      "name": "OCE Main Server",
+      "description": "Primary OCE gaming server",
+      "apiUrl": "https://httpbin.org/json",
+      "region": "OCE",
+      "gameType": "Warfare"
+    },
+    {
+      "name": "OCE Backup Server", 
+      "description": "Secondary OCE gaming server",
+      "apiUrl": "https://jsonplaceholder.typicode.com/posts/1",
+      "region": "OCE",
+      "gameType": "Skirmish"
+    },
+    {
+      "name": "OCE Training Server",
+      "description": "Training and practice server",
+      "apiUrl": "https://api.github.com/zen",
+      "region": "OCE",
+      "gameType": "Training"
+    }
+  ],
+  "config": {
+    "pollingInterval": 60,
+    "requestTimeout": 10000,
+    "maxRetries": 3,
+    "version": "1.0.0"
+  },
+  "columnConfig": {
+    "serverName": {
+      "label": "Server Name",
+      "sortable": true,
+      "visible": true
+    },
+    "allies": {
+      "label": "Allied Players",
+      "sortable": true,
+      "visible": true
+    },
+    "axis": {
+      "label": "Axis Players", 
+      "sortable": true,
+      "visible": true
+    },
+    "gameTime": {
+      "label": "Game Time",
+      "sortable": true,
+      "visible": true
+    },
+    "score": {
+      "label": "Score (A/A)",
+      "sortable": true,
+      "visible": true
+    },
+    "currentMap": {
+      "label": "Current Map",
+      "sortable": true,
+      "visible": true
+    },
+    "nextMap": {
+      "label": "Next Map",
+      "sortable": true,
+      "visible": true
+    },
+    "status": {
+      "label": "Status",
+      "sortable": false,
+      "visible": true
+    }
+  }
+}
