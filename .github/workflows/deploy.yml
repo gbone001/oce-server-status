@@ -31,6 +31,10 @@ jobs:
         run: node scripts/validate-servers.js
 
       - name: Build
+        env:
+          # Set via GitHub repository Variables or Secrets
+          # Example value: https://<your-pages-project>.pages.dev/api
+          REACT_APP_PROXY_URL: ${{ vars.REACT_APP_PROXY_URL || secrets.REACT_APP_PROXY_URL }}
         run: npm run build
 
       - name: Deploy to gh-pages
