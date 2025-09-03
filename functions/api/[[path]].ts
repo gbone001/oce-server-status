@@ -14,6 +14,7 @@ export async function onRequest(context: any): Promise<Response> {
 
   const url = new URL(request.url);
   const qTarget = url.searchParams.get('target');
+  const qHost = url.searchParams.get('host');
   let targetUrl: string;
 
   if (qTarget) {
@@ -55,6 +56,10 @@ export async function onRequest(context: any): Promise<Response> {
     const inHeaders = new Headers(request.headers);
     inHeaders.set('User-Agent', 'Cloudflare-Proxy');
     inHeaders.delete('host');
+    if (qHost) {
+      inHeaders.set('host', qHost);
+      inHeaders.set('Host', qHost);
+    }
 
     const hasBody = !['GET', 'HEAD'].includes(request.method);
     const body = hasBody ? await request.arrayBuffer() : undefined;
@@ -95,4 +100,3 @@ function applyCors(h: Headers) {
   const base = corsHeaders();
   for (const [k, v] of Object.entries(base)) h.set(k, v as string);
 }
-

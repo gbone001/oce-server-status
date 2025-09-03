@@ -21,7 +21,7 @@ export class ServerDataService {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
     try {
-      const url = this.toProxiedUrl(server.apiUrl);
+      const url = this.toProxiedUrl(server);
       const res = await fetch(url, { signal: controller.signal, headers: { 'Accept': 'application/json' } });
       if (!res.ok) {
         throw new Error(`HTTP ${res.status} ${res.statusText}`);
@@ -146,27 +146,28 @@ export class ServerDataService {
   }
 
   // If the apiUrl is http:// and the app is served over https, route via a proxy
-  private static toProxiedUrl(apiUrl: string): string {
+  private static toProxiedUrl(server: ServerConfig): string {
     try {
-      const u = new URL(apiUrl, window.location.origin);
+      const u = new URL(server.apiUrl, window.location.origin);
       const isHttp = u.protocol === 'http:';
       const isHttpsPage = typeof window !== 'undefined' && window.location.protocol === 'https:';
       if (isHttp && isHttpsPage) {
         // Prefer a dedicated proxy base if provided (e.g., Cloudflare Pages domain)
         const proxyBase = process.env.REACT_APP_PROXY_URL;
         const target = encodeURIComponent(u.toString());
+        const hostParam = server.hostHeader ? `&host=${encodeURIComponent(server.hostHeader)}` : '';
         if (proxyBase) {
           // Ensure no trailing slash
-          return `${proxyBase.replace(/\/$/, '')}?target=${target}`;
+          return `${proxyBase.replace(/\/$/, '')}?target=${target}${hostParam}`;
         }
         // Fall back to same-origin + PUBLIC_URL mounted functions path (if hosted with functions)
         const rawBase = process.env.PUBLIC_URL || '';
         const basePath = rawBase === '.' ? '' : rawBase.replace(/\/$/, '');
-        return `${window.location.origin}${basePath}/api?target=${target}`;
+        return `${window.location.origin}${basePath}/api?target=${target}${hostParam}`;
       }
       return u.toString();
     } catch {
-      return apiUrl; // fall back to raw
+      return server.apiUrl; // fall back to raw
     }
   }
 }
@@ -188,6 +189,7 @@ export namespace ServerDataService {
         }
         const name = typeof s.name === 'string' ? s.name.trim() : '';
         const url = typeof s.url === 'string' ? s.url.trim() : '';
+        const hostHeader = typeof s.host === 'string' ? s.host.trim() : (typeof s.hostHeader === 'string' ? s.hostHeader.trim() : '');
         if (!name) errors.push(`${path}.name must be a non-empty string`);
         if (!url) errors.push(`${path}.url must be a non-empty string`);
         const baseId = name
@@ -202,7 +204,9 @@ export namespace ServerDataService {
         }
         seenIds.add(id);
         if (name && url) {
-          result.push({ id, name, apiUrl: url });
+          const out: any = { id, name, apiUrl: url };
+          if (hostHeader) out.hostHeader = hostHeader;
+          result.push(out);
         }
       });
       if (errors.length > 0) {
@@ -238,7 +242,10 @@ export namespace ServerDataService {
         else seenIds.add(id);
       }
       if (typeof id === 'string' && typeof name === 'string' && typeof apiUrl === 'string') {
-        result.push({ id, name, apiUrl });
+        const out: any = { id, name, apiUrl };
+        if (typeof (s as any).hostHeader === 'string') out.hostHeader = (s as any).hostHeader;
+        if (typeof (s as any).host === 'string') out.hostHeader = (s as any).host;
+        result.push(out);
       }
     });
 

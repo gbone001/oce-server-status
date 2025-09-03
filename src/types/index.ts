@@ -2,6 +2,7 @@ export interface ServerConfig {
   id: string;
   name: string;
   apiUrl: string;
+  hostHeader?: string; // optional override for Host header at proxy
 }
 
 export interface ServerStatus {
