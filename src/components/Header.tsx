@@ -6,6 +6,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleTheme, isDark }) => {
+  const logoSrc = `${process.env.PUBLIC_URL}/${encodeURIComponent('new ANZR Logo 05 2025.png')}`;
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleTheme, isDark }) => {
             <div className="flex-shrink-0 flex items-center">
               {/* ANZR Logo */}
               <img 
-                src={`${process.env.PUBLIC_URL}/anzr-logo.svg`} 
+                src={logoSrc}
                 alt="ANZR Logo" 
                 width={48}
                 height={48}
@@ -30,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleTheme, isDark }) => {
           <div className="flex items-center">
             <button
               onClick={onToggleTheme}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
               aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {isDark ? (
