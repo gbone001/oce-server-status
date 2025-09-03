@@ -204,6 +204,14 @@ Notes:
 - `package.json:homepage` is already set for correct asset paths.
 - Assets that use `process.env.PUBLIC_URL` (e.g., logo, `servers.json`) will resolve under the GitHub Pages subpath.
 
+### GitHub Actions (manual runs and proxy env)
+
+- Manually trigger a deploy: In GitHub → Actions → select the "Deploy to GitHub Pages" workflow → Run workflow (this uses workflow_dispatch).
+- Configure proxy base for mixed-content avoidance:
+  - Repo → Settings → Secrets and variables → Actions → Variables (preferred) or Secrets
+  - Add `REACT_APP_PROXY_URL` with value `https://<your-pages-project>.pages.dev/api`
+  - The workflow passes this env into the CRA build so HTTP APIs are routed through the Cloudflare proxy.
+
 ### Cloudflare Pages Proxy (to avoid mixed content)
 
 If your server APIs are `http://` and your site runs on `https://` (GitHub Pages), enable the Cloudflare proxy and point the app at it:
