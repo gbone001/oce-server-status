@@ -1,6 +1,5 @@
 import React from 'react';
 import { ServerStatus } from '../types';
-import { StatusIndicator } from './StatusIndicator';
 
 interface ServerTableProps {
   serverStatuses: Map<string, ServerStatus>;
