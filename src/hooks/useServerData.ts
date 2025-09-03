@@ -10,8 +10,8 @@ export const useServerData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchServerStatuses = useCallback(async (serverList: ServerConfig[]) => {
-    if (serverList.length === 0) return;
+  const fetchServerStatuses = useCallback(async (serverList?: ServerConfig[]) => {
+    if (!Array.isArray(serverList) || serverList.length === 0) return;
 
     try {
       const statusPromises = serverList.map(server => 
@@ -52,7 +52,7 @@ export const useServerData = () => {
   }, []);
 
   const refreshData = useCallback(async () => {
-    if (servers.length > 0) {
+    if (Array.isArray(servers) && servers.length > 0) {
       await fetchServerStatuses(servers);
     }
   }, [servers, fetchServerStatuses]);
@@ -62,8 +62,9 @@ export const useServerData = () => {
     setError(null);
     try {
       const config = await ServerDataService.fetchServersConfig();
-      setServers(config.servers);
-      await fetchServerStatuses(config.servers);
+      const list = Array.isArray((config as any)?.servers) ? (config as any).servers as ServerConfig[] : [];
+      setServers(list);
+      await fetchServerStatuses(list);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load configuration');
     } finally {
@@ -76,7 +77,7 @@ export const useServerData = () => {
   }, [loadConfigAndStatuses]);
 
   useEffect(() => {
-    if (servers.length === 0) return;
+    if (!Array.isArray(servers) || servers.length === 0) return;
 
     const interval = setInterval(() => {
       refreshData();
